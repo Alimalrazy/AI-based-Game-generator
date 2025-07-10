@@ -1,0 +1,52 @@
+<!-- index.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>AI Game Generator</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        textarea { width: 400px; height: 60px; font-size: 16px; }
+        button { font-size: 16px; padding: 8px 16px; margin-left: 10px; }
+        iframe { width: 200px; height: 800px; border: 2px solid #333; margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <h1>AI Game Generator</h1>
+    <div>
+        <textarea id="prompt" placeholder="Type your game prompt here"></textarea>
+        <button onclick="generateGame()">Generate Game</button>
+    </div>
+
+    <iframe id="game-frame" sandbox="allow-scripts allow-same-origin"></iframe>
+
+    <script>
+        async function generateGame() {
+            const prompt = document.getElementById("prompt").value.trim();
+            if (!prompt) {
+                alert("Please enter a game description prompt!");
+                return;
+            }
+
+            const response = await fetch("http://localhost:8000/generate-game", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ prompt }),
+            });
+
+            if (!response.ok) {
+                alert("Failed to generate game.");
+                return;
+            }
+
+            const data = await response.json();
+            const code = data.gameCode;
+
+            // Render the received HTML+JS code inside iframe using srcdoc
+            const iframe = document.getElementById("game-frame");
+            iframe.srcdoc = code;
+        }
+    </script>
+</body>
+</html>

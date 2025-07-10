@@ -1,0 +1,4 @@
+streamlit
+uvicorn
+httpx
+& "c:/Users/HP ELITEBOOK/Downloads/AI-base-game-Devlopmentt-main/AI-base-game-Devlopmentt-main/.venv/Scripts/python.exe" -m streamlit run backend.py
