@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎮 AI Game Generator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1f77b4 0%, #ff7f0e 100%);
+            color: white;
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .section {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border-left: 5px solid #1f77b4;
+        }
+
+        .section h2 {
+            color: #1f77b4;
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: #1f77b4;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #1f77b4 0%, #ff7f0e 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: transform 0.3s;
+            width: 100%;
+            max-width: 300px;
+            margin: 0 auto;
+            display: block;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .provider-buttons {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .provider-btn {
+            flex: 1;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .provider-btn.active {
+            border-color: #1f77b4;
+            background: #f8f9ff;
+            color: #1f77b4;
+        }
+
+        .provider-btn:hover {
+            border-color: #1f77b4;
+            transform: translateY(-2px);
+        }
+
+        .api-provider {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+            display: none;
+        }
+
+        .api-provider.active {
+            display: block;
+            border-color: #1f77b4;
+            background: #f8f9ff;
+        }
+
+        .examples {
+            background: #e3f2fd;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 15px;
+        }
+
+        .examples h3 {
+            color: #1976d2;
+            margin-bottom: 10px;
+        }
+
+        .examples ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .examples li {
+            padding: 5px 0;
+            color: #555;
+        }
+
+        .examples li:before {
+            content: "🎯 ";
+            margin-right: 8px;
+        }
+
+        .game-preview {
+            background: white;
+            border: 3px solid #1f77b4;
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 30px;
+        }
+
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #ddd;
+        }
+
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .tab.active {
+            border-bottom-color: #1f77b4;
+            color: #1f77b4;
+            font-weight: bold;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .game-frame {
+            width: 100%;
+            height: 600px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+        }
+
+        .code-display {
+            background: #f5f5f5;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            max-height: 600px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+        }
+
+        .download-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #1f77b4;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+
+        .success {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            background: #f8f9fa;
+            color: #666;
+        }
+
+        .footer a {
+            color: #1f77b4;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎮 AI Game Generator</h1>
+            <p>Create amazing games with AI - Just describe and play!</p>
+        </div>
+
+        <div class="content">
+            <!-- API Configuration Section -->
+            <div class="section">
+                <h2>🔑 API Configuration</h2>
+                
+                <!-- Provider Selection -->
+                <div class="provider-buttons">
+                    <div class="provider-btn active" onclick="selectProvider('openrouter')">
+                        🤖 OpenRouter
+                    </div>
+                    <div class="provider-btn" onclick="selectProvider('gemini')">
+                        🌟 Gemini
+                    </div>
+                </div>
+
+                <!-- OpenRouter Configuration -->
+                <div id="openrouterConfig" class="api-provider active">
+                    <h3>🤖 OpenRouter API</h3>
+                    <div class="form-group">
+                        <label for="openrouterKey">OpenRouter API Key:</label>
+                        <input type="password" id="openrouterKey" placeholder="Enter your OpenRouter API key...">
+                        <small style="color: #666; margin-top: 5px; display: block;">
+                            Get your free API key at <a href="https://openrouter.ai/keys" target="_blank">openrouter.ai/keys</a>
+                        </small>
+                    </div>
+                    <div class="form-group">
+                        <label for="openrouterModel">AI Model:</label>
+                        <select id="openrouterModel">
+                            <option value="deepseek/deepseek-chat-v3-0324:free">DeepSeek Chat (Free)</option>
+                            <option value="anthropic/claude-3.5-sonnet">Claude 3.5 Sonnet</option>
+                            <option value="openai/gpt-4o">GPT-4o</option>
+                            <option value="meta-llama/llama-3.1-8b-instruct:free">Llama 3.1 (Free)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Gemini Configuration -->
+                <div id="geminiConfig" class="api-provider">
+                    <h3>🌟 Gemini API</h3>
+                    <div class="form-group">
+                        <label for="geminiKey">Gemini API Key:</label>
+                        <input type="password" id="geminiKey" placeholder="Enter your Gemini API key...">
+                        <small style="color: #666; margin-top: 5px; display: block;">
+                            Get your API key at <a href="https://makersuite.google.com/app/apikey" target="_blank">makersuite.google.com</a>
+                        </small>
+                    </div>
+                    <div class="form-group">
+                        <label for="geminiModel">Gemini Model:</label>
+                        <select id="geminiModel">
+                            <option value="gemini-2.0-flash">Gemini 2.0 Flash</option>
+                            <option value="gemini-1.5-flash">Gemini 1.5 Flash</option>
+                            <option value="gemini-1.5-pro">Gemini 1.5 Pro</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Game Description Section -->
+            <div class="section">
+                <h2>🎯 Describe Your Game</h2>
+                <div class="form-group">
+                    <label for="gameDescription">Game Description:</label>
+                    <textarea id="gameDescription" rows="6" placeholder="Describe the game you want to create..."></textarea>
+                </div>
+                
+                <div class="examples">
+                    <h3>💡 Example Descriptions:</h3>
+                    <ul>
+                        <li>A simple snake game where you control a snake to eat food and grow longer</li>
+                        <li>A memory card game where you match pairs of cards</li>
+                        <li>A clicker game where you click a button to earn points and buy upgrades</li>
+                        <li>A simple platformer where you jump over obstacles</li>
+                        <li>A tic-tac-toe game for two players</li>
+                        <li>A simple racing game where you avoid obstacles</li>
+                    </ul>
+                </div>
+
+                <button class="btn" onclick="generateGame()" id="generateBtn">🚀 Generate Game</button>
+            </div>
+
+            <!-- Loading Section -->
+            <div id="loadingSection" class="loading" style="display: none;">
+                <div class="spinner"></div>
+                <h3>🤖 AI is creating your game...</h3>
+                <p>This may take a few moments. Please wait...</p>
+            </div>
+
+            <!-- Game Preview Section -->
+            <div id="gameSection" class="game-preview" style="display: none;">
+                <h2>🎮 Your Generated Game</h2>
+                
+                <div class="tabs">
+                    <div class="tab active" onclick="switchTab('play')">🎮 Play Game</div>
+                    <div class="tab" onclick="switchTab('code')">📝 View Code</div>
+                </div>
+
+                <div id="playTab" class="tab-content active">
+                    <p><strong>Instructions:</strong> Use the controls below to play your generated game!</p>
+                    <iframe id="gameFrame" class="game-frame"></iframe>
+                </div>
+
+                <div id="codeTab" class="tab-content">
+                    <div id="codeDisplay" class="code-display"></div>
+                    <button class="download-btn" onclick="downloadGame()">💾 Download Game</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>🎮 AI Game Generator | Powered by OpenRouter & Gemini</p>
+            <p>Get your API keys at <a href="https://openrouter.ai/keys" target="_blank">openrouter.ai/keys</a> or <a href="https://makersuite.google.com/app/apikey" target="_blank">makersuite.google.com</a></p>
+        </div>
+    </div>
+
+    <script>
+        let generatedCode = '';
+        let currentProvider = 'openrouter';
+
+        function selectProvider(provider) {
+            currentProvider = provider;
+            
+            // Update button styles
+            document.querySelectorAll('.provider-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Update configuration visibility
+            document.getElementById('openrouterConfig').classList.remove('active');
+            document.getElementById('geminiConfig').classList.remove('active');
+            
+            if (provider === 'openrouter') {
+                document.getElementById('openrouterConfig').classList.add('active');
+            } else {
+                document.getElementById('geminiConfig').classList.add('active');
+            }
+        }
+
+        async function generateGame() {
+            let apiKey, model;
+            
+            if (currentProvider === 'openrouter') {
+                apiKey = document.getElementById('openrouterKey').value.trim();
+                model = document.getElementById('openrouterModel').value;
+            } else {
+                apiKey = document.getElementById('geminiKey').value.trim();
+                model = document.getElementById('geminiModel').value;
+            }
+            
+            const description = document.getElementById('gameDescription').value.trim();
+
+            // Validation
+            if (!apiKey) {
+                showError(`Please enter your ${currentProvider === 'openrouter' ? 'OpenRouter' : 'Gemini'} API key first!`);
+                return;
+            }
+            if (!description) {
+                showError('Please enter a game description!');
+                return;
+            }
+
+            // Show loading
+            document.getElementById('loadingSection').style.display = 'block';
+            document.getElementById('gameSection').style.display = 'none';
+            document.getElementById('generateBtn').disabled = true;
+
+            try {
+                let response;
+                
+                if (currentProvider === 'openrouter') {
+                    response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${apiKey}`,
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            model: model,
+                            messages: [
+                                {
+                                    role: 'system',
+                                    content: 'You are an expert game developer. Generate only complete, runnable HTML games with embedded CSS and JavaScript. Focus on creating engaging, interactive experiences.'
+                                },
+                                {
+                                    role: 'user',
+                                    content: `Create a complete, interactive game in HTML, CSS, and JavaScript based on this description: "${description}"
+
+Requirements:
+1. Make it fully playable and interactive
+2. Include proper game mechanics, scoring, and user feedback
+3. Use modern CSS for attractive styling
+4. Add sound effects or visual feedback where appropriate
+5. Make it responsive and work on different screen sizes
+6. Include clear instructions for the player
+
+Return ONLY the complete HTML code with embedded CSS and JavaScript.
+Do NOT include any explanations outside the code.
+The code should be ready to run immediately.`
+                                }
+                            ],
+                            temperature: 0.7,
+                            max_tokens: 8000
+                        })
+                    });
+                } else {
+                    // Gemini API call
+                    response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            contents: [
+                                {
+                                    parts: [
+                                        {
+                                            text: `You are an expert game developer. Generate only complete, runnable HTML games with embedded CSS and JavaScript. Focus on creating engaging, interactive experiences.
+
+Create a complete, interactive game in HTML, CSS, and JavaScript based on this description: "${description}"
+
+Requirements:
+1. Make it fully playable and interactive
+2. Include proper game mechanics, scoring, and user feedback
+3. Use modern CSS for attractive styling
+4. Add sound effects or visual feedback where appropriate
+5. Make it responsive and work on different screen sizes
+6. Include clear instructions for the player
+
+Return ONLY the complete HTML code with embedded CSS and JavaScript.
+Do NOT include any explanations outside the code.
+The code should be ready to run immediately.`
+                                        }
+                                    ]
+                                }
+                            ]
+                        })
+                    });
+                }
+
+                if (!response.ok) {
+                    throw new Error(`API Error: ${response.status} ${response.statusText}`);
+                }
+
+                const data = await response.json();
+                
+                if (currentProvider === 'openrouter') {
+                    generatedCode = data.choices[0].message.content.trim();
+                } else {
+                    generatedCode = data.candidates[0].content.parts[0].text.trim();
+                }
+
+                // Display the game
+                document.getElementById('gameFrame').srcdoc = generatedCode;
+                document.getElementById('codeDisplay').textContent = generatedCode;
+
+                // Show game section
+                document.getElementById('gameSection').style.display = 'block';
+                showSuccess(`🎉 Game generated successfully with ${currentProvider === 'openrouter' ? 'OpenRouter' : 'Gemini'}!`);
+
+            } catch (error) {
+                showError(`Error generating game: ${error.message}`);
+                console.error('Error:', error);
+            } finally {
+                // Hide loading
+                document.getElementById('loadingSection').style.display = 'none';
+                document.getElementById('generateBtn').disabled = false;
+            }
+        }
+
+        function switchTab(tabName) {
+            // Update tab buttons
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            event.target.classList.add('active');
+
+            // Update tab content
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            if (tabName === 'play') {
+                document.getElementById('playTab').classList.add('active');
+            } else {
+                document.getElementById('codeTab').classList.add('active');
+            }
+        }
+
+        function downloadGame() {
+            if (!generatedCode) {
+                showError('No game code to download!');
+                return;
+            }
+
+            const blob = new Blob([generatedCode], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'generated_game.html';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function showError(message) {
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error';
+            errorDiv.textContent = message;
+            document.querySelector('.content').insertBefore(errorDiv, document.getElementById('loadingSection'));
+            setTimeout(() => errorDiv.remove(), 5000);
+        }
+
+        function showSuccess(message) {
+            const successDiv = document.createElement('div');
+            successDiv.className = 'success';
+            successDiv.textContent = message;
+            document.querySelector('.content').insertBefore(successDiv, document.getElementById('loadingSection'));
+            setTimeout(() => successDiv.remove(), 5000);
+        }
+
+        // Save API keys to localStorage
+        document.getElementById('openrouterKey').addEventListener('input', function() {
+            localStorage.setItem('openrouter_api_key', this.value);
+        });
+
+        document.getElementById('geminiKey').addEventListener('input', function() {
+            localStorage.setItem('gemini_api_key', this.value);
+        });
+
+        // Load API keys from localStorage
+        window.addEventListener('load', function() {
+            const savedOpenRouterKey = localStorage.getItem('openrouter_api_key');
+            const savedGeminiKey = localStorage.getItem('gemini_api_key');
+            
+            if (savedOpenRouterKey) {
+                document.getElementById('openrouterKey').value = savedOpenRouterKey;
+            }
+            if (savedGeminiKey) {
+                document.getElementById('geminiKey').value = savedGeminiKey;
+            }
+        });
+    </script>
+</body>
+</html> 
